@@ -37,7 +37,7 @@ No mention of POSH committee, sexual harassment policy, or Internal Complaints C
 // ─── System Prompts ─────────────────────────────────────────────────────────
 
 const SYSTEM_PROMPTS = {
-  jd: `You are HireTrue, an expert HR analyst specializing in the Indian job market and workplace law. Analyze job descriptions with deep knowledge of Indian hiring culture, DEI challenges, and labour law.
+  jd: `You are LensHR, an expert HR analyst specializing in the Indian job market and workplace law. Analyze job descriptions with deep knowledge of Indian hiring culture, DEI challenges, and labour law.
 
 Respond in clean, well-structured plain text (no markdown symbols like ** or ##). Use clear section headings in CAPS followed by a colon. Be specific, direct, and actionable.
 
@@ -62,11 +62,9 @@ SUGGESTED REWRITE:
 Quote the worst offending line, then provide a better version.
 
 INDIA MARKET INSIGHT:
-One specific insight about how this JD would perform in the current Indian talent market.
+One specific insight about how this JD would perform in the current Indian talent market.`,
 
-Be honest, specific, and grounded in Indian hiring reality.`,
-
-  offer: `You are HireTrue, an expert in Indian employment law and HR practices. Decode offer letters for candidates in India with deep knowledge of the Indian Contract Act, Labour Codes, and industry norms.
+  offer: `You are LensHR, an expert in Indian employment law and HR practices. Decode offer letters for candidates in India with deep knowledge of the Indian Contract Act, Labour Codes, and industry norms.
 
 Respond in clean, well-structured plain text (no markdown symbols like ** or ##). Use clear section headings in CAPS. Be specific, direct, and protective of the candidate's interests.
 
@@ -87,11 +85,9 @@ NEGOTIATION OPPORTUNITIES:
 List 2 to 3 specific things that are negotiable in the Indian employment context, with suggested language.
 
 INDIA INDUSTRY BENCHMARK:
-Compare key terms of this offer against current Indian industry standards for similar roles.
+Compare key terms of this offer against current Indian industry standards for similar roles.`,
 
-Be direct and prioritize the candidate's legal and financial interests.`,
-
-  policy: `You are HireTrue, an expert in Indian labour law and HR compliance. Analyze HR policies against India's legal requirements with deep knowledge of the Labour Codes 2019-2020, POSH Act 2013, Maternity Benefit Act, Payment of Gratuity Act, and other applicable statutes.
+  policy: `You are LensHR, an expert in Indian labour law and HR compliance. Analyze HR policies against India's legal requirements with deep knowledge of the consolidated Labour Codes (November 2025), POSH Act 2013, Maternity Benefit Act, Payment of Gratuity Act, and other applicable statutes.
 
 Respond in clean, well-structured plain text (no markdown symbols like ** or ##). Use clear section headings in CAPS. Be specific about which laws apply and what exactly needs to change.
 
@@ -112,9 +108,7 @@ WHAT IS COMPLIANT:
 List 2 to 3 things the policy does correctly.
 
 PRIORITY FIX:
-Identify the single most urgent compliance issue to fix first and explain why it must be addressed immediately.
-
-Be specific about legal obligations and realistic about risk levels.`
+Identify the single most urgent compliance issue to fix first and explain why it must be addressed immediately.`
 };
 
 // ─── Tab Switching ───────────────────────────────────────────────────────────
@@ -152,7 +146,6 @@ document.querySelectorAll('.analyze-btn').forEach(btn => {
       showError('Please paste a document before analyzing.');
       return;
     }
-
     if (text.length < 50) {
       showError('The document seems too short. Please paste the full text.');
       return;
@@ -163,15 +156,6 @@ document.querySelectorAll('.analyze-btn').forEach(btn => {
 });
 
 async function runAnalysis(type, text, btn) {
-  // Get API key from config
-  const apiKey = window.HIRETRUE_API_KEY;
-
-  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
-    showError('API key not configured. Please add your Anthropic API key to config.js');
-    return;
-  }
-
-  // Show loading
   btn.disabled = true;
   hideResults();
   showLoading(true);
@@ -183,31 +167,24 @@ async function runAnalysis(type, text, btn) {
   };
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Calls our secure Vercel function — API key never exposed to browser
+    const response = await fetch('/api/analyze', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        system: SYSTEM_PROMPTS[type],
-        messages: [{ role: 'user', content: text }]
+        systemPrompt: SYSTEM_PROMPTS[type],
+        userContent: text
       })
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.error?.message || 'API request failed. Check your API key.');
+      throw new Error(data.error || 'Analysis failed. Please try again.');
     }
 
-    const data = await response.json();
-    const result = data.content.map(b => b.text || '').join('');
-
     showLoading(false);
-    showResult(titles[type], result);
+    showResult(titles[type], data.result);
 
   } catch (err) {
     showLoading(false);
