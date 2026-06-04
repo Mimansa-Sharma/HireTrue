@@ -297,3 +297,18 @@ textarea:focus { outline: none; border-color: var(--green); }
   .tool-tab { font-size: 12px; padding: 12px 8px; }
   .hero-stats { flex-wrap: wrap; gap: 16px; }
 }
+
+/* Module icon text boxes (replacing emojis) */
+.module-icon-box {
+  width: 44px; height: 44px;
+  background: var(--green-light); color: var(--green-dark);
+  border-radius: var(--radius); display: flex; align-items: center;
+  justify-content: center; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.5px; margin-bottom: 16px;
+}
+
+/* About cards without emojis */
+.about-card-label {
+  font-size: 15px; font-weight: 500; color: var(--ink);
+  margin-bottom: 8px;
+}
