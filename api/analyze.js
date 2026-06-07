@@ -9,25 +9,26 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
     return res.status(500).json({ error: 'API key not configured on server' });
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 1500,
-        system: system,
-        messages: [{ role: 'user', content: text }]
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: text }
+        ]
       })
     });
 
@@ -37,7 +38,7 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    const result = data.content.map(b => b.text || '').join('');
+    const result = data.choices?.[0]?.message?.content || '';
     return res.status(200).json({ result });
 
   } catch (err) {
