@@ -1,4 +1,4 @@
-// ─── Sample Documents ───────────────────────────────────────────────────────
+// ─── Sample Documents ────────────────────────────────────────────────────────
 
 const SAMPLES = {
   jd: `Software Engineer — 3-5 years experience required
@@ -31,10 +31,10 @@ Working Hours: 9 hours per day, 48 hours per week.
 Termination: Company may terminate with 30 days notice or payment in lieu.
 Grievance: Employees can raise grievances with HR manager directly.
 
-No mention of POSH committee, sexual harassment policy, or Internal Complaints Committee (ICC).`
+No mention of any sexual harassment policy or Internal Complaints Committee.`
 };
 
-// ─── System Prompts ─────────────────────────────────────────────────────────
+// ─── System Prompts ──────────────────────────────────────────────────────────
 
 const SYSTEM_PROMPTS = {
   jd: `You are LensHR, an expert HR analyst specializing in the Indian job market and workplace law. Analyze job descriptions with deep knowledge of Indian hiring culture, DEI challenges, and labour law.
@@ -62,7 +62,9 @@ SUGGESTED REWRITE:
 Quote the worst offending line, then provide a better version.
 
 INDIA MARKET INSIGHT:
-One specific insight about how this JD would perform in the current Indian talent market.`,
+One specific insight about how this JD would perform in the current Indian talent market.
+
+Be honest, specific, and grounded in Indian hiring reality.`,
 
   offer: `You are LensHR, an expert in Indian employment law and HR practices. Decode offer letters for candidates in India with deep knowledge of the Indian Contract Act, Labour Codes, and industry norms.
 
@@ -85,9 +87,11 @@ NEGOTIATION OPPORTUNITIES:
 List 2 to 3 specific things that are negotiable in the Indian employment context, with suggested language.
 
 INDIA INDUSTRY BENCHMARK:
-Compare key terms of this offer against current Indian industry standards for similar roles.`,
+Compare key terms of this offer against current Indian industry standards for similar roles.
 
-  policy: `You are LensHR, an expert in Indian labour law and HR compliance. Analyze HR policies against India's legal requirements with deep knowledge of the consolidated Labour Codes (November 2025), POSH Act 2013, Maternity Benefit Act, Payment of Gratuity Act, and other applicable statutes.
+Be direct and prioritize the candidate's legal and financial interests.`,
+
+  policy: `You are LensHR, an expert in Indian labour law and HR compliance. Analyze HR policies against India's four consolidated Labour Codes implemented on November 21, 2025, which unified 29 legacy laws into a single framework, along with other applicable statutes.
 
 Respond in clean, well-structured plain text (no markdown symbols like ** or ##). Use clear section headings in CAPS. Be specific about which laws apply and what exactly needs to change.
 
@@ -108,7 +112,9 @@ WHAT IS COMPLIANT:
 List 2 to 3 things the policy does correctly.
 
 PRIORITY FIX:
-Identify the single most urgent compliance issue to fix first and explain why it must be addressed immediately.`
+Identify the single most urgent compliance issue to fix first and explain why it must be addressed immediately.
+
+Be specific about legal obligations and realistic about risk levels.`
 };
 
 // ─── Tab Switching ───────────────────────────────────────────────────────────
@@ -146,6 +152,7 @@ document.querySelectorAll('.analyze-btn').forEach(btn => {
       showError('Please paste a document before analyzing.');
       return;
     }
+
     if (text.length < 50) {
       showError('The document seems too short. Please paste the full text.');
       return;
@@ -167,22 +174,21 @@ async function runAnalysis(type, text, btn) {
   };
 
   try {
-    // Calls our secure Vercel function — API key never exposed to browser
     const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        systemPrompt: SYSTEM_PROMPTS[type],
-        userContent: text
+        system: SYSTEM_PROMPTS[type],
+        text: text
       })
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new Error(data.error || 'Analysis failed. Please try again.');
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || 'Analysis failed. Please try again.');
     }
 
+    const data = await response.json();
     showLoading(false);
     showResult(titles[type], data.result);
 
@@ -194,7 +200,7 @@ async function runAnalysis(type, text, btn) {
   btn.disabled = false;
 }
 
-// ─── UI Helpers ───────────────────────────────────────────────────────────────
+// ─── UI Helpers ──────────────────────────────────────────────────────────────
 
 function showLoading(show) {
   document.getElementById('loading-area').style.display = show ? 'flex' : 'none';
