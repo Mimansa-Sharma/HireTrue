@@ -217,6 +217,14 @@ function showResult(title, content) {
   document.getElementById('result-body').textContent = content;
   document.getElementById('result-area').style.display = 'block';
   document.getElementById('result-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showFeedback();
+  // Track analysis event in Google Analytics
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'analysis_completed', {
+      'event_category': 'tool_usage',
+      'event_label': title
+    });
+  }
 }
 
 function showError(msg) {
@@ -234,3 +242,30 @@ document.getElementById('copy-btn').addEventListener('click', () => {
     setTimeout(() => { btn.textContent = 'Copy Results'; }, 2000);
   });
 });
+
+// ─── Feedback Button ─────────────────────────────────────────────────────────
+
+function showFeedback() {
+  const area = document.getElementById('feedback-area');
+  const thanks = document.getElementById('feedback-thanks');
+  const btns = document.getElementById('feedback-btns');
+  if (area) {
+    area.style.display = 'block';
+    thanks.style.display = 'none';
+    document.querySelectorAll('.feedback-btn').forEach(b => b.style.display = 'inline-flex');
+  }
+}
+
+function submitFeedback(value) {
+  // Send event to Google Analytics
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'feedback', {
+      'event_category': 'engagement',
+      'event_label': value,
+      'value': value === 'yes' ? 1 : 0
+    });
+  }
+  // Show thank you message
+  document.querySelectorAll('.feedback-btn').forEach(b => b.style.display = 'none');
+  document.getElementById('feedback-thanks').style.display = 'block';
+}
