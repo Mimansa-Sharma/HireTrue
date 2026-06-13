@@ -312,3 +312,30 @@ textarea:focus { outline: none; border-color: var(--green); }
   font-size: 15px; font-weight: 500; color: var(--ink);
   margin-bottom: 8px;
 }
+
+/* Feedback */
+.feedback-area {
+  padding: 16px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.feedback-question {
+  font-size: 13px; color: var(--ink-mid);
+  margin-bottom: 10px;
+}
+.feedback-btns { display: flex; gap: 10px; }
+.feedback-btn {
+  padding: 8px 20px; font-size: 13px; font-weight: 500;
+  border-radius: var(--radius); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+  background: var(--green); color: #fff; border: none;
+}
+.feedback-btn:hover { background: var(--green-dark); }
+.feedback-btn-no {
+  background: none; color: var(--ink-mid);
+  border: 1px solid var(--border);
+}
+.feedback-btn-no:hover { background: var(--surface-2); }
+.feedback-thanks {
+  font-size: 13px; color: var(--green); margin-top: 8px;
+}
