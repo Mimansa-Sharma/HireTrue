@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LensHR — HR Document Intelligence for India</title>
   <meta name="description" content="AI-powered HR document analysis for the Indian workplace. Audit job descriptions for bias, decode offer letters, and check HR policies for compliance." />
+    <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JN52PL116R"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JN52PL116R');
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -166,6 +174,14 @@
             <button class="copy-btn" id="copy-btn">Copy Results</button>
           </div>
           <div class="result-body" id="result-body"></div>
+          <div class="feedback-area" id="feedback-area" style="display:none;">
+            <p class="feedback-question">Was this analysis helpful?</p>
+            <div class="feedback-btns">
+              <button class="feedback-btn" id="feedback-yes" onclick="submitFeedback('yes')">Yes, it helped</button>
+              <button class="feedback-btn feedback-btn-no" id="feedback-no" onclick="submitFeedback('no')">Not really</button>
+            </div>
+            <p class="feedback-thanks" id="feedback-thanks" style="display:none;">Thank you for your feedback!</p>
+          </div>
         </div>
         <div class="loading-area" id="loading-area" style="display:none;">
           <div class="loading-dots">
