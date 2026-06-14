@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LensHR — HR Document Intelligence for India</title>
-  <meta name="description" content="AI-powered HR document analysis for the Indian workplace. Audit job descriptions for bias, decode offer letters, and check HR policies for compliance." />
-    <!-- Google Analytics -->
+  <meta name="description" content="HR document analysis for the Indian workplace. Audit job descriptions for bias, decode offer letters, and check HR policies for compliance." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JN52PL116R"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -13,9 +16,8 @@
     gtag('js', new Date());
     gtag('config', 'G-JN52PL116R');
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -32,8 +34,55 @@
         <a href="#modules">Modules</a>
         <a href="#about">About</a>
       </div>
+      <div class="nav-auth" id="nav-auth">
+        <button class="btn-nav-login" onclick="openAuth('login')">Log in</button>
+        <button class="btn-nav-signup" onclick="openAuth('signup')">Sign up free</button>
+      </div>
+      <div class="nav-user" id="nav-user" style="display:none;">
+        <span class="nav-user-email" id="nav-user-email"></span>
+        <button class="btn-nav-logout" onclick="signOut()">Log out</button>
+      </div>
     </div>
   </nav>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="auth-modal" style="display:none;">
+    <div class="modal">
+      <button class="modal-close" onclick="closeAuth()">×</button>
+      <div class="modal-logo">
+        <div class="logo-mark">LH</div>
+        <span class="logo-name">LensHR</span>
+      </div>
+
+      <!-- Limit hit message -->
+      <div class="modal-limit-msg" id="modal-limit-msg" style="display:none;">
+        <div class="limit-icon">3/3</div>
+        <p>You've used your 3 free analyses. Create a free account to continue.</p>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tab-login" onclick="switchAuthTab('login')">Log in</button>
+        <button class="modal-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign up</button>
+      </div>
+
+      <div id="auth-login">
+        <input class="auth-input" type="email" id="login-email" placeholder="Your email address" />
+        <input class="auth-input" type="password" id="login-password" placeholder="Password" />
+        <button class="auth-btn" onclick="signIn()">Log in</button>
+        <p class="auth-switch">Don't have an account? <a href="#" onclick="switchAuthTab('signup')">Sign up free</a></p>
+      </div>
+
+      <div id="auth-signup" style="display:none;">
+        <input class="auth-input" type="text" id="signup-name" placeholder="Your full name" />
+        <input class="auth-input" type="email" id="signup-email" placeholder="Your email address" />
+        <input class="auth-input" type="password" id="signup-password" placeholder="Create a password (min 6 chars)" />
+        <button class="auth-btn" onclick="signUp()">Create free account</button>
+        <p class="auth-switch">Already have an account? <a href="#" onclick="switchAuthTab('login')">Log in</a></p>
+      </div>
+
+      <div id="auth-message" class="auth-message" style="display:none;"></div>
+    </div>
+  </div>
 
   <!-- HERO -->
   <section class="hero" id="home">
@@ -43,11 +92,11 @@
       <p class="hero-sub">LensHR reads through job descriptions, offer letters, and HR policies so you don't have to guess. It finds what's biased, what's risky, and what's non-compliant — and tells you exactly where.</p>
       <a href="#tool" class="btn-primary">Start Analyzing</a>
       <div class="hero-stats">
-        <div class="stat"><span class="stat-num">3</span><span class="stat-label">Analysis Modules</span></div>
+        <div class="stat"><span class="stat-num">3</span><span class="stat-label">Free Analyses</span></div>
         <div class="stat-div"></div>
         <div class="stat"><span class="stat-num">India</span><span class="stat-label">Labour Law Aligned</span></div>
         <div class="stat-div"></div>
-        <div class="stat"><span class="stat-num">Free</span><span class="stat-label">No Sign-up Needed</span></div>
+        <div class="stat"><span class="stat-num">Free</span><span class="stat-label">No Sign-up to Start</span></div>
       </div>
     </div>
     <div class="hero-graphic" aria-hidden="true">
@@ -144,6 +193,17 @@
     <div class="container">
       <div class="section-label">Analyze your document</div>
       <h2 class="section-title">Paste your document, get instant analysis</h2>
+
+      <!-- Usage counter for guests -->
+      <div class="usage-bar" id="usage-bar">
+        <span id="usage-text">3 free analyses remaining</span>
+        <div class="usage-dots">
+          <div class="usage-dot active" id="dot-1"></div>
+          <div class="usage-dot active" id="dot-2"></div>
+          <div class="usage-dot active" id="dot-3"></div>
+        </div>
+      </div>
+
       <div class="tool-card">
         <div class="tool-tabs">
           <button class="tool-tab active" data-tab="jd">JD Auditor</button>
@@ -177,8 +237,8 @@
           <div class="feedback-area" id="feedback-area" style="display:none;">
             <p class="feedback-question">Was this analysis helpful?</p>
             <div class="feedback-btns">
-              <button class="feedback-btn" id="feedback-yes" onclick="submitFeedback('yes')">Yes, it helped</button>
-              <button class="feedback-btn feedback-btn-no" id="feedback-no" onclick="submitFeedback('no')">Not really</button>
+              <button class="feedback-btn" onclick="submitFeedback('yes')">Yes, it helped</button>
+              <button class="feedback-btn feedback-btn-no" onclick="submitFeedback('no')">Not really</button>
             </div>
             <p class="feedback-thanks" id="feedback-thanks" style="display:none;">Thank you for your feedback!</p>
           </div>
@@ -236,6 +296,7 @@
   </footer>
 
   <script src="config.js"></script>
+  <script src="auth.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
