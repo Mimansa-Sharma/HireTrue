@@ -62,9 +62,7 @@ SUGGESTED REWRITE:
 Quote the worst offending line, then provide a better version.
 
 INDIA MARKET INSIGHT:
-One specific insight about how this JD would perform in the current Indian talent market.
-
-Be honest, specific, and grounded in Indian hiring reality.`,
+One specific insight about how this JD would perform in the current Indian talent market.`,
 
   offer: `You are LensHR, an expert in Indian employment law and HR practices. Decode offer letters for candidates in India with deep knowledge of the Indian Contract Act, Labour Codes, and industry norms.
 
@@ -84,16 +82,14 @@ CLARIFY BEFORE SIGNING:
 List 3 to 4 specific questions to ask the employer before accepting.
 
 NEGOTIATION OPPORTUNITIES:
-List 2 to 3 specific things that are negotiable in the Indian employment context, with suggested language.
+List 2 to 3 specific things that are negotiable in the Indian employment context.
 
 INDIA INDUSTRY BENCHMARK:
-Compare key terms of this offer against current Indian industry standards for similar roles.
-
-Be direct and prioritize the candidate's legal and financial interests.`,
+Compare key terms of this offer against current Indian industry standards for similar roles.`,
 
   policy: `You are LensHR, an expert in Indian labour law and HR compliance. Analyze HR policies against India's four consolidated Labour Codes implemented on November 21, 2025, which unified 29 legacy laws into a single framework, along with other applicable statutes.
 
-Respond in clean, well-structured plain text (no markdown symbols like ** or ##). Use clear section headings in CAPS. Be specific about which laws apply and what exactly needs to change.
+Respond in clean, well-structured plain text (no markdown symbols like ** or ##). Use clear section headings in CAPS.
 
 Structure your response exactly like this:
 
@@ -112,9 +108,7 @@ WHAT IS COMPLIANT:
 List 2 to 3 things the policy does correctly.
 
 PRIORITY FIX:
-Identify the single most urgent compliance issue to fix first and explain why it must be addressed immediately.
-
-Be specific about legal obligations and realistic about risk levels.`
+Identify the single most urgent compliance issue to fix first and explain why.`
 };
 
 // ─── Tab Switching ───────────────────────────────────────────────────────────
@@ -134,9 +128,7 @@ document.querySelectorAll('.tool-tab').forEach(tab => {
 
 document.querySelectorAll('.sample-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    const targetId = btn.dataset.target;
-    const sampleKey = btn.dataset.sample;
-    document.getElementById(targetId).value = SAMPLES[sampleKey];
+    document.getElementById(btn.dataset.target).value = SAMPLES[btn.dataset.sample];
   });
 });
 
@@ -145,16 +137,14 @@ document.querySelectorAll('.sample-btn').forEach(btn => {
 document.querySelectorAll('.analyze-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
     const type = btn.dataset.type;
-    const inputEl = document.getElementById(type + '-input');
-    const text = inputEl.value.trim();
+    const text = document.getElementById(type + '-input').value.trim();
 
-    if (!text) {
-      showError('Please paste a document before analyzing.');
-      return;
-    }
+    if (!text) { showError('Please paste a document before analyzing.'); return; }
+    if (text.length < 50) { showError('The document seems too short. Please paste the full text.'); return; }
 
-    if (text.length < 50) {
-      showError('The document seems too short. Please paste the full text.');
+    // Check free limit for guests
+    if (!window._lenshrUser && getUsageCount() >= 3) {
+      openAuth('signup', true);
       return;
     }
 
@@ -177,10 +167,7 @@ async function runAnalysis(type, text, btn) {
     const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system: SYSTEM_PROMPTS[type],
-        text: text
-      })
+      body: JSON.stringify({ system: SYSTEM_PROMPTS[type], text })
     });
 
     if (!response.ok) {
@@ -189,8 +176,16 @@ async function runAnalysis(type, text, btn) {
     }
 
     const data = await response.json();
+
+    // Increment usage for guests only
+    if (!window._lenshrUser) incrementUsage();
+
     showLoading(false);
     showResult(titles[type], data.result);
+
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'analysis_completed', { event_category: 'tool_usage', event_label: titles[type] });
+    }
 
   } catch (err) {
     showLoading(false);
@@ -216,15 +211,10 @@ function showResult(title, content) {
   document.getElementById('result-title').textContent = title;
   document.getElementById('result-body').textContent = content;
   document.getElementById('result-area').style.display = 'block';
+  document.getElementById('feedback-area').style.display = 'block';
+  document.getElementById('feedback-thanks').style.display = 'none';
+  document.querySelectorAll('.feedback-btn').forEach(b => b.style.display = 'inline-flex');
   document.getElementById('result-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  showFeedback();
-  // Track analysis event in Google Analytics
-  if (typeof gtag !== 'undefined') {
-    gtag('event', 'analysis_completed', {
-      'event_category': 'tool_usage',
-      'event_label': title
-    });
-  }
 }
 
 function showError(msg) {
@@ -243,29 +233,12 @@ document.getElementById('copy-btn').addEventListener('click', () => {
   });
 });
 
-// ─── Feedback Button ─────────────────────────────────────────────────────────
-
-function showFeedback() {
-  const area = document.getElementById('feedback-area');
-  const thanks = document.getElementById('feedback-thanks');
-  const btns = document.getElementById('feedback-btns');
-  if (area) {
-    area.style.display = 'block';
-    thanks.style.display = 'none';
-    document.querySelectorAll('.feedback-btn').forEach(b => b.style.display = 'inline-flex');
-  }
-}
+// ─── Feedback ────────────────────────────────────────────────────────────────
 
 function submitFeedback(value) {
-  // Send event to Google Analytics
   if (typeof gtag !== 'undefined') {
-    gtag('event', 'feedback', {
-      'event_category': 'engagement',
-      'event_label': value,
-      'value': value === 'yes' ? 1 : 0
-    });
+    gtag('event', 'feedback', { event_category: 'engagement', event_label: value, value: value === 'yes' ? 1 : 0 });
   }
-  // Show thank you message
   document.querySelectorAll('.feedback-btn').forEach(b => b.style.display = 'none');
   document.getElementById('feedback-thanks').style.display = 'block';
 }
