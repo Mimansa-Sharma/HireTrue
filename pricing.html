@@ -7,30 +7,34 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="style.css" />
   <style>
-    .pricing-hero { text-align: center; padding: 80px 24px 48px; }
-    .pricing-hero h1 { font-size: clamp(32px, 4vw, 48px); font-weight: 300; margin-bottom: 16px; }
-    .pricing-hero p { font-size: 16px; color: var(--ink-mid); max-width: 500px; margin: 0 auto; }
-    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
-    .pricing-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; }
-    .pricing-card.featured { border-color: var(--green); position: relative; }
-    .pricing-card-badge { position: absolute; top: -12px; left: 24px; background: var(--green); color: #fff; font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 999px; }
-    .pricing-name { font-size: 14px; font-weight: 500; color: var(--ink-mid); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .pricing-price { font-size: 40px; font-weight: 300; color: var(--ink); margin-bottom: 4px; }
-    .pricing-price span { font-size: 16px; color: var(--ink-mid); }
-    .pricing-desc { font-size: 14px; color: var(--ink-mid); margin-bottom: 24px; line-height: 1.6; }
-    .pricing-btn { display: block; width: 100%; padding: 12px; text-align: center; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: none; transition: all 0.15s; margin-bottom: 24px; }
-    .pricing-btn-primary { background: var(--green); color: #fff; border: none; }
+    .pricing-wrap { max-width: 960px; margin: 0 auto; padding: 80px 24px; }
+    .pricing-hero { text-align: center; margin-bottom: 60px; }
+    .pricing-hero h1 { font-size: clamp(32px,4vw,48px); font-weight: 300; margin-bottom: 14px; letter-spacing: -0.5px; }
+    .pricing-hero p { font-size: 16px; color: var(--text-mid); }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .pricing-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 32px; position: relative; transition: border-color 0.2s; }
+    .pricing-card:hover { border-color: var(--border-hover); }
+    .pricing-card.featured { border-color: rgba(0,196,140,0.3); }
+    .pricing-card-badge { position: absolute; top: -12px; left: 24px; background: var(--green); color: #000; font-size: 11px; font-weight: 500; padding: 3px 12px; border-radius: 999px; }
+    .pricing-name { font-size: 12px; font-weight: 500; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .pricing-price { font-size: 42px; font-weight: 300; color: var(--text); margin-bottom: 4px; letter-spacing: -1px; }
+    .pricing-price span { font-size: 16px; color: var(--text-mid); font-weight: 400; }
+    .pricing-desc { font-size: 13px; color: var(--text-mid); margin-bottom: 24px; line-height: 1.6; }
+    .pricing-btn { display: block; width: 100%; padding: 12px; text-align: center; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: none; transition: all 0.15s; margin-bottom: 28px; border: none; }
+    .pricing-btn-primary { background: var(--green); color: #000; box-shadow: var(--green-glow); }
     .pricing-btn-primary:hover { background: var(--green-dark); }
-    .pricing-btn-secondary { background: none; color: var(--ink); border: 1px solid var(--border); }
-    .pricing-btn-secondary:hover { background: var(--surface); }
+    .pricing-btn-secondary { background: none; color: var(--text-mid); border: 1px solid var(--border); }
+    .pricing-btn-secondary:hover { background: var(--bg-3); color: var(--text); }
+    .pricing-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pricing-divider { height: 1px; background: var(--border); margin-bottom: 20px; }
     .pricing-features { list-style: none; }
-    .pricing-features li { font-size: 14px; color: var(--ink-mid); padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-start; }
+    .pricing-features li { font-size: 13px; color: var(--text-mid); padding: 7px 0; display: flex; gap: 10px; align-items: flex-start; border-bottom: 1px solid var(--border); }
     .pricing-features li:last-child { border: none; }
     .pricing-features li::before { content: '✓'; color: var(--green); font-weight: 500; flex-shrink: 0; }
-    .coming-soon-note { text-align: center; font-size: 13px; color: var(--ink-light); padding-bottom: 48px; }
+    .pricing-note { text-align: center; font-size: 13px; color: var(--text-light); margin-top: 40px; }
+    @media (max-width: 768px) { .pricing-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -47,67 +51,72 @@
         <a href="index.html#about">About</a>
       </div>
       <div class="nav-auth">
-        <a href="index.html" class="btn-nav-login">Log in</a>
-        <a href="index.html" class="btn-nav-signup" style="text-decoration:none; padding: 8px 16px; border-radius: 12px;">Sign up free</a>
+        <a href="index.html" style="font-size:14px;color:var(--text-mid);text-decoration:none;padding:6px 12px;">Log in</a>
+        <a href="index.html" class="btn-nav-signup" style="text-decoration:none;">Sign up free</a>
       </div>
     </div>
   </nav>
 
-  <div class="pricing-hero">
-    <div class="section-label">Pricing</div>
-    <h1>Simple, honest pricing</h1>
-    <p>Start free. Upgrade when you need more. No hidden charges.</p>
+  <div class="pricing-wrap">
+    <div class="pricing-hero">
+      <div class="section-label">Pricing</div>
+      <h1>Simple, honest pricing</h1>
+      <p>Start free. Upgrade when you need more. No hidden charges, no surprises.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">Free</div>
+        <div class="pricing-price">₹0 <span>/ forever</span></div>
+        <div class="pricing-desc">For trying LensHR and occasional use.</div>
+        <a href="index.html" class="pricing-btn pricing-btn-secondary">Get started</a>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>3 analyses per month</li>
+          <li>All 4 tools included</li>
+          <li>Full results every time</li>
+          <li>No credit card needed</li>
+        </ul>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-card-badge">Coming Soon</div>
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-price">₹99 <span>/ month</span></div>
+        <div class="pricing-desc">For job seekers and HR professionals who use LensHR regularly.</div>
+        <button class="pricing-btn pricing-btn-primary" disabled>Notify me</button>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>Unlimited analyses</li>
+          <li>All 4 tools included</li>
+          <li>Analysis history</li>
+          <li>Priority processing</li>
+          <li>Export results as PDF</li>
+        </ul>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-name">Teams</div>
+        <div class="pricing-price">₹499 <span>/ month</span></div>
+        <div class="pricing-desc">For HR teams and placement offices handling multiple documents.</div>
+        <button class="pricing-btn pricing-btn-secondary" disabled>Coming soon</button>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>Up to 10 team members</li>
+          <li>Unlimited analyses</li>
+          <li>Shared workspace</li>
+          <li>Bulk document upload</li>
+          <li>Team analytics</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="pricing-note">Paid plans are coming soon. Enjoy free access while we build them.</p>
   </div>
-
-  <div class="pricing-grid">
-    <div class="pricing-card">
-      <div class="pricing-name">Free</div>
-      <div class="pricing-price">₹0 <span>/ forever</span></div>
-      <div class="pricing-desc">Perfect for trying LensHR and occasional use.</div>
-      <a href="index.html" class="pricing-btn pricing-btn-secondary">Get started free</a>
-      <ul class="pricing-features">
-        <li>3 analyses per month</li>
-        <li>All 4 tools included</li>
-        <li>Full results every time</li>
-        <li>No credit card needed</li>
-      </ul>
-    </div>
-
-    <div class="pricing-card featured">
-      <div class="pricing-card-badge">Coming Soon</div>
-      <div class="pricing-name">Pro</div>
-      <div class="pricing-price">₹299 <span>/ month</span></div>
-      <div class="pricing-desc">For job seekers, HR professionals, and frequent users.</div>
-      <button class="pricing-btn pricing-btn-primary" disabled style="opacity:0.6;cursor:not-allowed;">Notify me when available</button>
-      <ul class="pricing-features">
-        <li>Unlimited analyses</li>
-        <li>All 4 tools included</li>
-        <li>Priority processing</li>
-        <li>Analysis history</li>
-        <li>Export results as PDF</li>
-      </ul>
-    </div>
-
-    <div class="pricing-card">
-      <div class="pricing-name">Teams</div>
-      <div class="pricing-price">₹999 <span>/ month</span></div>
-      <div class="pricing-desc">For HR teams and placement offices managing multiple documents.</div>
-      <button class="pricing-btn pricing-btn-secondary" disabled style="opacity:0.6;cursor:not-allowed;">Coming soon</button>
-      <ul class="pricing-features">
-        <li>Up to 10 team members</li>
-        <li>Unlimited analyses</li>
-        <li>Shared workspace</li>
-        <li>Bulk document upload</li>
-        <li>Team analytics dashboard</li>
-      </ul>
-    </div>
-  </div>
-
-  <p class="coming-soon-note">Paid plans are coming soon. Enjoy unlimited free access while we build them.</p>
 
   <footer class="footer">
     <div class="container footer-inner">
-      <div class="logo">
+      <div class="logo" style="justify-content:center;margin-bottom:12px;">
         <div class="logo-mark">LH</div>
         <span class="logo-name">LensHR</span>
       </div>
