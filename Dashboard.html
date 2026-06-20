@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — LensHR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JN52PL116R"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JN52PL116R');
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body class="dashboard-body">
+
+  <!-- Guest gate: shown if not logged in -->
+  <div class="guest-gate" id="guest-gate" style="display:none;">
+    <div class="guest-gate-card">
+      <div class="logo modal-logo">
+        <div class="logo-mark">LH</div>
+        <span class="logo-name">LensHR</span>
+      </div>
+      <h2>Sign in to access your dashboard</h2>
+      <p>Create a free account to use all LensHR tools without limits.</p>
+      <button class="btn-primary" onclick="window.location.href='index.html'">Go to Sign In</button>
+    </div>
+  </div>
+
+  <div class="dash-wrap" id="dash-wrap" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <a href="index.html" class="logo">
+          <div class="logo-mark">LH</div>
+          <span class="logo-name">LensHR</span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-label">Tools</div>
+        <button class="sidebar-link active" data-tool="jd">
+          <span class="sidebar-icon">JD</span> JD Auditor
+        </button>
+        <button class="sidebar-link" data-tool="offer">
+          <span class="sidebar-icon">OL</span> Offer Decoder
+        </button>
+        <button class="sidebar-link" data-tool="policy">
+          <span class="sidebar-icon">PG</span> Policy Gap Finder
+        </button>
+        <button class="sidebar-link" data-tool="resume">
+          <span class="sidebar-icon">RC</span> Resume ATS Checker
+          <span class="sidebar-new-tag">New</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="sidebar-avatar">U</div>
+          <span class="sidebar-user-email" id="sidebar-email">Loading...</span>
+        </div>
+        <button class="sidebar-logout" onclick="signOut()">Log out</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="dash-main">
+      <header class="dash-header">
+        <h1 id="dash-title">JD Auditor</h1>
+        <p id="dash-subtitle">Paste a job description to audit it for bias, exclusionary language, and candidate appeal.</p>
+      </header>
+
+      <div class="dash-content">
+
+        <!-- JD Auditor Panel -->
+        <div class="tool-panel active" id="panel-jd">
+          <button class="sample-btn" data-target="jd-input" data-sample="jd">Load a sample JD</button>
+          <textarea id="jd-input" placeholder="Paste the full job description here..."></textarea>
+          <button class="analyze-btn" data-type="jd">Analyze JD</button>
+        </div>
+
+        <!-- Offer Decoder Panel -->
+        <div class="tool-panel" id="panel-offer">
+          <button class="sample-btn" data-target="offer-input" data-sample="offer">Load a sample offer letter</button>
+          <textarea id="offer-input" placeholder="Paste your offer letter text here..."></textarea>
+          <button class="analyze-btn" data-type="offer">Decode Offer</button>
+        </div>
+
+        <!-- Policy Gap Finder Panel -->
+        <div class="tool-panel" id="panel-policy">
+          <button class="sample-btn" data-target="policy-input" data-sample="policy">Load a sample policy</button>
+          <textarea id="policy-input" placeholder="Paste your HR policy document here..."></textarea>
+          <button class="analyze-btn" data-type="policy">Find Gaps</button>
+        </div>
+
+        <!-- Resume ATS Checker Panel -->
+        <div class="tool-panel" id="panel-resume">
+          <button class="sample-btn" data-target="resume-input" data-sample="resume">Load a sample resume</button>
+          <textarea id="resume-input" placeholder="Paste your resume text here (copy from your Word doc or PDF)..."></textarea>
+          <input class="auth-input" type="text" id="resume-jd" placeholder="Optional: paste the job description to check keyword match" style="margin-top:0;" />
+          <button class="analyze-btn" data-type="resume">Check ATS Compatibility</button>
+        </div>
+
+        <!-- Results -->
+        <div class="result-area" id="result-area" style="display:none;">
+          <div class="result-header">
+            <span id="result-title">Analysis Results</span>
+            <button class="copy-btn" id="copy-btn">Copy Results</button>
+          </div>
+          <div class="result-body" id="result-body"></div>
+          <div class="feedback-area" id="feedback-area" style="display:none;">
+            <p class="feedback-question">Was this analysis helpful?</p>
+            <div class="feedback-btns">
+              <button class="feedback-btn" onclick="submitFeedback('yes')">Yes, it helped</button>
+              <button class="feedback-btn feedback-btn-no" onclick="submitFeedback('no')">Not really</button>
+            </div>
+            <p class="feedback-thanks" id="feedback-thanks" style="display:none;">Thank you for your feedback!</p>
+          </div>
+        </div>
+
+        <div class="loading-area" id="loading-area" style="display:none;">
+          <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <p>Analyzing your document...</p>
+        </div>
+
+        <div class="error-area" id="error-area" style="display:none;">
+          <p id="error-msg">Something went wrong. Please try again.</p>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
