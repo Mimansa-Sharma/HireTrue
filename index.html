@@ -4,11 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LensHR — HR Document Intelligence for India</title>
-  <meta name="description" content="HR document analysis for the Indian workplace. Audit job descriptions for bias, decode offer letters, and check HR policies for compliance." />
+  <meta name="description" content="HR document analysis for the Indian workplace. Audit job descriptions, decode offer letters, check policy compliance, and verify your resume is ATS-friendly." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JN52PL116R"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -16,7 +15,6 @@
     gtag('js', new Date());
     gtag('config', 'G-JN52PL116R');
   </script>
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -29,9 +27,9 @@
         <span class="logo-name">LensHR</span>
       </div>
       <div class="nav-links">
-        <a href="#tool">Analyze</a>
         <a href="#how">How It Works</a>
-        <a href="#modules">Modules</a>
+        <a href="#modules">Features</a>
+        <a href="pricing.html">Pricing</a>
         <a href="#about">About</a>
       </div>
       <div class="nav-auth" id="nav-auth">
@@ -39,7 +37,7 @@
         <button class="btn-nav-signup" onclick="openAuth('signup')">Sign up free</button>
       </div>
       <div class="nav-user" id="nav-user" style="display:none;">
-        <span class="nav-user-email" id="nav-user-email"></span>
+        <a href="dashboard.html" class="btn-nav-dashboard">Go to Dashboard</a>
         <button class="btn-nav-logout" onclick="signOut()">Log out</button>
       </div>
     </div>
@@ -53,25 +51,16 @@
         <div class="logo-mark">LH</div>
         <span class="logo-name">LensHR</span>
       </div>
-
-      <!-- Limit hit message -->
-      <div class="modal-limit-msg" id="modal-limit-msg" style="display:none;">
-        <div class="limit-icon">3/3</div>
-        <p>You've used your 3 free analyses. Create a free account to continue.</p>
-      </div>
-
       <div class="modal-tabs">
         <button class="modal-tab active" id="tab-login" onclick="switchAuthTab('login')">Log in</button>
         <button class="modal-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign up</button>
       </div>
-
       <div id="auth-login">
         <input class="auth-input" type="email" id="login-email" placeholder="Your email address" />
         <input class="auth-input" type="password" id="login-password" placeholder="Password" />
         <button class="auth-btn" onclick="signIn()">Log in</button>
         <p class="auth-switch">Don't have an account? <a href="#" onclick="switchAuthTab('signup')">Sign up free</a></p>
       </div>
-
       <div id="auth-signup" style="display:none;">
         <input class="auth-input" type="text" id="signup-name" placeholder="Your full name" />
         <input class="auth-input" type="email" id="signup-email" placeholder="Your email address" />
@@ -79,7 +68,6 @@
         <button class="auth-btn" onclick="signUp()">Create free account</button>
         <p class="auth-switch">Already have an account? <a href="#" onclick="switchAuthTab('login')">Log in</a></p>
       </div>
-
       <div id="auth-message" class="auth-message" style="display:none;"></div>
     </div>
   </div>
@@ -89,14 +77,14 @@
     <div class="hero-inner">
       <div class="hero-badge">Built for India's Workplace</div>
       <h1 class="hero-title">HR documents,<br /><em>examined closely.</em></h1>
-      <p class="hero-sub">LensHR reads through job descriptions, offer letters, and HR policies so you don't have to guess. It finds what's biased, what's risky, and what's non-compliant — and tells you exactly where.</p>
-      <a href="#tool" class="btn-primary">Start Analyzing</a>
+      <p class="hero-sub">LensHR reads through job descriptions, offer letters, HR policies, and resumes so you don't have to guess. It finds what's biased, what's risky, and what's missing — and tells you exactly where.</p>
+      <button class="btn-primary" onclick="openAuth('signup')">Start Analyzing Free</button>
       <div class="hero-stats">
-        <div class="stat"><span class="stat-num">3</span><span class="stat-label">Free Analyses</span></div>
+        <div class="stat"><span class="stat-num">4</span><span class="stat-label">Analysis Tools</span></div>
         <div class="stat-div"></div>
         <div class="stat"><span class="stat-num">India</span><span class="stat-label">Labour Law Aligned</span></div>
         <div class="stat-div"></div>
-        <div class="stat"><span class="stat-num">Free</span><span class="stat-label">No Sign-up to Start</span></div>
+        <div class="stat"><span class="stat-num">Free</span><span class="stat-label">To Get Started</span></div>
       </div>
     </div>
     <div class="hero-graphic" aria-hidden="true">
@@ -127,18 +115,18 @@
       <div class="steps-grid">
         <div class="step-card">
           <div class="step-num">01</div>
-          <h3>Paste your document</h3>
-          <p>Job description, offer letter, or HR policy — paste the text into LensHR's analyzer.</p>
+          <h3>Create a free account</h3>
+          <p>Sign up in seconds — no credit card needed to get started.</p>
         </div>
         <div class="step-card">
           <div class="step-num">02</div>
-          <h3>Choose your module</h3>
-          <p>JD Auditor for bias, Offer Decoder for red flags, Policy Gap Finder for legal compliance.</p>
+          <h3>Choose your tool</h3>
+          <p>JD Auditor, Offer Decoder, Policy Gap Finder, or Resume ATS Checker.</p>
         </div>
         <div class="step-card">
           <div class="step-num">03</div>
           <h3>Get actionable results</h3>
-          <p>Scores, flagged clauses, law references, and rewrite suggestions — specific and instant.</p>
+          <p>Scores, flagged issues, law references, and rewrite suggestions — instantly.</p>
         </div>
       </div>
     </div>
@@ -148,109 +136,29 @@
   <section class="modules" id="modules">
     <div class="container">
       <div class="section-label">What LensHR checks</div>
-      <h2 class="section-title">Three modules, built for India</h2>
-      <div class="modules-grid">
+      <h2 class="section-title">Four tools, built for India</h2>
+      <div class="modules-grid modules-grid-4">
         <div class="module-card">
           <div class="module-icon-box">JD</div>
           <h3>JD Auditor</h3>
-          <p>Scores job descriptions on bias, clarity, candidate appeal, and realism. Flags exclusionary language and inflated requirements common in Indian hiring.</p>
-          <ul class="module-list">
-            <li>Bias and gender language detection</li>
-            <li>Candidate appeal score</li>
-            <li>Realism check on requirements</li>
-            <li>Line-by-line rewrite suggestions</li>
-          </ul>
+          <p>Scores job descriptions on bias, clarity, candidate appeal, and realism.</p>
         </div>
         <div class="module-card featured">
           <div class="module-badge">Most Used</div>
           <div class="module-icon-box">OL</div>
           <h3>Offer Decoder</h3>
-          <p>Translates offer letters into plain language. Surfaces risky clauses, one-sided terms, and negotiation opportunities specific to Indian employment context.</p>
-          <ul class="module-list">
-            <li>IP and non-compete clause risk</li>
-            <li>Notice period analysis</li>
-            <li>Variable pay structure breakdown</li>
-            <li>India industry benchmarking</li>
-          </ul>
+          <p>Translates offer letters into plain language and flags risky clauses.</p>
         </div>
         <div class="module-card">
           <div class="module-icon-box">PG</div>
           <h3>Policy Gap Finder</h3>
-          <p>Checks HR policies against India's four consolidated Labour Codes (November 2025), which unified 29 legacy laws into a single framework.</p>
-          <ul class="module-list">
-            <li>Consolidated Labour Code compliance</li>
-            <li>Statutory leave entitlement checks</li>
-            <li>Grievance mechanism gaps</li>
-            <li>Missing clause identification</li>
-          </ul>
+          <p>Checks HR policies against India's consolidated Labour Codes.</p>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TOOL -->
-  <section class="tool-section" id="tool">
-    <div class="container">
-      <div class="section-label">Analyze your document</div>
-      <h2 class="section-title">Paste your document, get instant analysis</h2>
-
-      <!-- Usage counter for guests -->
-      <div class="usage-bar" id="usage-bar">
-        <span id="usage-text">3 free analyses remaining</span>
-        <div class="usage-dots">
-          <div class="usage-dot active" id="dot-1"></div>
-          <div class="usage-dot active" id="dot-2"></div>
-          <div class="usage-dot active" id="dot-3"></div>
-        </div>
-      </div>
-
-      <div class="tool-card">
-        <div class="tool-tabs">
-          <button class="tool-tab active" data-tab="jd">JD Auditor</button>
-          <button class="tool-tab" data-tab="offer">Offer Decoder</button>
-          <button class="tool-tab" data-tab="policy">Policy Gap Finder</button>
-        </div>
-        <div class="tool-panel active" id="panel-jd">
-          <p class="panel-desc">Paste a job description to audit it for bias, exclusionary language, and candidate appeal with India-specific insights.</p>
-          <button class="sample-btn" data-target="jd-input" data-sample="jd">Load a sample JD</button>
-          <textarea id="jd-input" placeholder="Paste the full job description here..."></textarea>
-          <button class="analyze-btn" data-type="jd">Analyze JD</button>
-        </div>
-        <div class="tool-panel" id="panel-offer">
-          <p class="panel-desc">Paste your offer letter to surface risky clauses, negotiation opportunities, and how it compares to Indian industry norms.</p>
-          <button class="sample-btn" data-target="offer-input" data-sample="offer">Load a sample offer letter</button>
-          <textarea id="offer-input" placeholder="Paste your offer letter text here..."></textarea>
-          <button class="analyze-btn" data-type="offer">Decode Offer</button>
-        </div>
-        <div class="tool-panel" id="panel-policy">
-          <p class="panel-desc">Paste your HR policy to check it against India's consolidated Labour Codes, statutory requirements, and compliance benchmarks.</p>
-          <button class="sample-btn" data-target="policy-input" data-sample="policy">Load a sample policy</button>
-          <textarea id="policy-input" placeholder="Paste your HR policy document here..."></textarea>
-          <button class="analyze-btn" data-type="policy">Find Gaps</button>
-        </div>
-        <div class="result-area" id="result-area" style="display:none;">
-          <div class="result-header">
-            <span id="result-title">Analysis Results</span>
-            <button class="copy-btn" id="copy-btn">Copy Results</button>
-          </div>
-          <div class="result-body" id="result-body"></div>
-          <div class="feedback-area" id="feedback-area" style="display:none;">
-            <p class="feedback-question">Was this analysis helpful?</p>
-            <div class="feedback-btns">
-              <button class="feedback-btn" onclick="submitFeedback('yes')">Yes, it helped</button>
-              <button class="feedback-btn feedback-btn-no" onclick="submitFeedback('no')">Not really</button>
-            </div>
-            <p class="feedback-thanks" id="feedback-thanks" style="display:none;">Thank you for your feedback!</p>
-          </div>
-        </div>
-        <div class="loading-area" id="loading-area" style="display:none;">
-          <div class="loading-dots">
-            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-          </div>
-          <p>Analyzing your document...</p>
-        </div>
-        <div class="error-area" id="error-area" style="display:none;">
-          <p id="error-msg">Something went wrong. Please try again.</p>
+        <div class="module-card">
+          <div class="module-badge module-badge-new">New</div>
+          <div class="module-icon-box">RC</div>
+          <h3>Resume ATS Checker</h3>
+          <p>Checks if your resume will pass automated screening systems.</p>
         </div>
       </div>
     </div>
@@ -262,28 +170,26 @@
       <div>
         <div class="section-label">About</div>
         <h2 class="section-title">Built by <em>Mimansa Sharma</em><br />for India's HR reality</h2>
-        <p>Indian job seekers sign documents they do not fully understand. HR teams post job descriptions that quietly filter out strong candidates. Policies go unchecked against laws that have changed. LensHR was built to fix that.</p>
+        <p>Indian job seekers sign documents they do not fully understand. HR teams post job descriptions that quietly filter out strong candidates. Resumes get rejected by automated systems before a human ever sees them. LensHR was built to fix that.</p>
         <p>Most HR tools are designed for Western markets and are disconnected from India's labour law landscape. LensHR is built from the ground up for how hiring and employment actually work in India.</p>
-        <p>Where most tools give general feedback, LensHR identifies the exact problem, scores it, and tells you what to do next. It works for both sides of the table — HR professionals who write and review documents, and individuals who need to understand what they are being asked to accept.</p>
       </div>
       <div class="about-cards">
         <div class="about-card">
           <div class="about-card-label">India-first</div>
-          <p>Built around India's consolidated Labour Codes and local hiring norms, not borrowed frameworks from other markets.</p>
+          <p>Built around India's consolidated Labour Codes and local hiring norms.</p>
         </div>
         <div class="about-card">
           <div class="about-card-label">Scored, not vague</div>
-          <p>Every analysis delivers real scores for bias, compliance, and appeal so you know exactly where you stand and what to address first.</p>
+          <p>Every analysis delivers real scores so you know exactly where you stand.</p>
         </div>
         <div class="about-card">
           <div class="about-card-label">Both sides of the table</div>
-          <p>Built equally for HR professionals managing documents and for individuals trying to understand what they are signing.</p>
+          <p>Built for HR professionals and for individuals navigating their careers.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer class="footer">
     <div class="container footer-inner">
       <div class="logo">
@@ -297,6 +203,11 @@
 
   <script src="config.js"></script>
   <script src="auth.js"></script>
-  <script src="app.js"></script>
+  <script>
+    // Redirect logged-in users straight to dashboard if they click Start Analyzing
+    document.addEventListener('DOMContentLoaded', () => {
+      const heroBtn = document.querySelector('.btn-primary');
+    });
+  </script>
 </body>
 </html>
