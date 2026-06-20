@@ -1,16 +1,12 @@
 // ─── Supabase Setup ───────────────────────────────────────────────────────────
 
-const SUPABASE_URL = 'https://kfbkblrxpgkpwjdaqg.supabase.co';
+const SUPABASE_URL = 'https://kfbkbblrxpgkpwjdaqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtmYmtiYmxyeHBna3B3amRhcWciLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4MTQyNzU5MiwiZXhwIjoyMDk3MDAzNTkyfQ.5J_olH3CM0R07hrAYByBQi2Dyoinkqpynq_L3ZehLxU';
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const FREE_LIMIT = 3;
 window._lenshrUser = null;
-
-// ─── Page detection ───────────────────────────────────────────────────────────
-
 const isDashboard = window.location.pathname.includes('dashboard');
 
 // ─── Auth State ───────────────────────────────────────────────────────────────
@@ -19,13 +15,11 @@ sb.auth.onAuthStateChange((event, session) => {
   window._lenshrUser = session?.user || null;
 
   if (isDashboard) {
-    // On dashboard: show content if logged in, gate if not
     const gate = document.getElementById('guest-gate');
     const wrap = document.getElementById('dash-wrap');
     if (session?.user) {
       if (gate) gate.style.display = 'none';
       if (wrap) wrap.style.display = 'flex';
-      // Set user info in sidebar
       const emailEl = document.getElementById('sidebar-email');
       const avatarEl = document.getElementById('sidebar-avatar');
       if (emailEl) emailEl.textContent = session.user.email;
@@ -35,11 +29,9 @@ sb.auth.onAuthStateChange((event, session) => {
       if (wrap) wrap.style.display = 'none';
     }
   } else {
-    // On landing page: update nav
     updateNavAuth(session?.user);
-    // If just logged in, redirect to dashboard
     if (event === 'SIGNED_IN' && session?.user) {
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 500);
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
     }
   }
 });
@@ -56,12 +48,9 @@ function updateNavAuth(user) {
   }
 }
 
-// ─── Free Limit (guests only) ─────────────────────────────────────────────────
+// ─── Usage Limit (guests) ─────────────────────────────────────────────────────
 
-function getUsageCount() {
-  return parseInt(localStorage.getItem('lenshr_usage') || '0');
-}
-
+function getUsageCount() { return parseInt(localStorage.getItem('lenshr_usage') || '0'); }
 function incrementUsage() {
   const count = getUsageCount() + 1;
   localStorage.setItem('lenshr_usage', count);
@@ -89,11 +78,7 @@ function closeAuth() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('auth-modal');
-  if (overlay) {
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeAuth();
-    });
-  }
+  if (overlay) overlay.addEventListener('click', e => { if (e.target === overlay) closeAuth(); });
 });
 
 function switchAuthTab(tab) {
@@ -113,7 +98,7 @@ function showAuthMessage(msg, isError) {
   if (!el) return;
   el.textContent = msg;
   el.style.display = 'block';
-  el.style.color = isError ? '#C0392B' : '#1D9E75';
+  el.style.color = isError ? '#FF5A5A' : '#00C48C';
 }
 
 function clearAuthMessage() {
@@ -132,7 +117,7 @@ async function signUp() {
   showAuthMessage('Creating your account...', false);
   const { error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name } } });
   if (error) { showAuthMessage(error.message, true); }
-  else { showAuthMessage('Account created! Please check your email to confirm, then log in.', false); }
+  else { showAuthMessage('Account created! Check your email to confirm, then log in.', false); }
 }
 
 // ─── Sign In ─────────────────────────────────────────────────────────────────
