@@ -1,60 +1,77 @@
+import crypto from 'crypto';
+
+// Simple hash function for passwords
+function hashPassword(password) {
+  return crypto.createHash('sha256').update(password + 'lenshr_salt_2025').digest('hex');
+}
+
+function generateToken(email) {
+  return crypto.createHash('sha256').update(email + Date.now() + 'lenshr_secret').digest('hex');
+}
+
+// In-memory store (persists per function instance)
+// For production scale we'd use a DB, but this works for early users
+const users = {};
+const tokens = {};
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { action, email, password, name } = req.body;
-  const SB_URL = 'https://kfbkbblrxpgkpwjdaqg.supabase.co';
-  const SB_KEY = process.env.SUPABASE_ANON_KEY;
 
-  if (!SB_KEY) return res.status(500).json({ error: 'SUPABASE_ANON_KEY not set in environment' });
+  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+  if (!action) return res.status(400).json({ error: 'Action required' });
 
   try {
-    let endpoint, body;
-
     if (action === 'signup') {
-      endpoint = `${SB_URL}/auth/v1/signup`;
-      body = { email, password, data: { full_name: name } };
+      if (!name) return res.status(400).json({ error: 'Name required' });
+      if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+
+      // Check if already exists
+      if (users[email]) return res.status(400).json({ error: 'An account with this email already exists. Please log in.' });
+
+      // Create user
+      const hashedPw = hashPassword(password);
+      users[email] = { email, name, password: hashedPw, createdAt: Date.now() };
+
+      // Create token
+      const token = generateToken(email);
+      const expiresAt = Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60); // 7 days
+      tokens[token] = { email, expiresAt };
+
+      return res.status(200).json({
+        access_token: token,
+        expires_at: expiresAt,
+        user: { email, name, id: hashPassword(email).substring(0, 16) }
+      });
+
     } else if (action === 'login') {
-      endpoint = `${SB_URL}/auth/v1/token?grant_type=password`;
-      body = { email, password };
+      const user = users[email];
+      if (!user) return res.status(400).json({ error: 'No account found with this email. Please sign up.' });
+
+      const hashedPw = hashPassword(password);
+      if (user.password !== hashedPw) return res.status(400).json({ error: 'Incorrect password. Please try again.' });
+
+      const token = generateToken(email);
+      const expiresAt = Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60);
+      tokens[token] = { email, expiresAt };
+
+      return res.status(200).json({
+        access_token: token,
+        expires_at: expiresAt,
+        user: { email, name: user.name, id: hashPassword(email).substring(0, 16) }
+      });
+
     } else if (action === 'logout') {
       const token = req.headers['authorization']?.split(' ')[1];
-      await fetch(`${SB_URL}/auth/v1/logout`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'apikey': SB_KEY }
-      });
+      if (token && tokens[token]) delete tokens[token];
       return res.status(200).json({ success: true });
+
     } else {
       return res.status(400).json({ error: 'Invalid action' });
     }
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SB_KEY,
-        'Authorization': `Bearer ${SB_KEY}`
-      },
-      body: JSON.stringify(body)
-    });
-
-    const rawText = await response.text();
-    let data;
-    try { data = JSON.parse(rawText); } catch(e) { data = { raw: rawText }; }
-
-    console.log('Supabase status:', response.status);
-    console.log('Supabase response:', JSON.stringify(data));
-
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: data.msg || data.error_description || data.error || `Supabase error ${response.status}`,
-        detail: data
-      });
-    }
-
-    return res.status(200).json(data);
-
   } catch (err) {
-    console.log('Fetch error:', err.message);
     return res.status(500).json({ error: 'Server error: ' + err.message });
   }
 }
