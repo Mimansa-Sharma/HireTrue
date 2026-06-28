@@ -7,6 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  
+  <!-- CDNs for Client-Side File Extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JN52PL116R"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -50,7 +55,7 @@
           <span class="sidebar-icon">JD</span> JD Auditor
         </button>
         <button class="sidebar-link" data-tool="offer">
-          <span class="sidebar-icon">OL</span> Offer Decoder
+          <span class="sidebar-icon">OA</span> Offer & Agreement Decoder
         </button>
         <button class="sidebar-link" data-tool="policy">
           <span class="sidebar-icon">PG</span> Policy Gap Finder
@@ -81,6 +86,15 @@
 
         <!-- JD Auditor Panel -->
         <div class="tool-panel active" id="panel-jd">
+          <div class="upload-dropzone" id="dropzone-jd" data-target="jd-input">
+            <div class="dropzone-icon">📁</div>
+            <div class="dropzone-text">
+              <strong>Drag & drop your Job Description here</strong> or <span class="browse-link">browse</span>
+            </div>
+            <div class="dropzone-info">Supports PDF, DOCX, TXT (Max 5MB)</div>
+            <input type="file" id="file-jd" class="file-input" accept=".pdf,.docx,.txt" style="display:none;" />
+          </div>
+          <div class="input-divider"><span>OR</span></div>
           <button class="sample-btn" data-target="jd-input" data-sample="jd">Load a sample JD</button>
           <textarea id="jd-input" placeholder="Paste the full job description here..."></textarea>
           <button class="analyze-btn" data-type="jd">Analyze JD</button>
@@ -88,13 +102,31 @@
 
         <!-- Offer Decoder Panel -->
         <div class="tool-panel" id="panel-offer">
+          <div class="upload-dropzone" id="dropzone-offer" data-target="offer-input">
+            <div class="dropzone-icon">📁</div>
+            <div class="dropzone-text">
+              <strong>Drag & drop your Offer Letter or Agreement here</strong> or <span class="browse-link">browse</span>
+            </div>
+            <div class="dropzone-info">Supports PDF, DOCX, TXT (Max 5MB)</div>
+            <input type="file" id="file-offer" class="file-input" accept=".pdf,.docx,.txt" style="display:none;" />
+          </div>
+          <div class="input-divider"><span>OR</span></div>
           <button class="sample-btn" data-target="offer-input" data-sample="offer">Load a sample offer letter</button>
-          <textarea id="offer-input" placeholder="Paste your offer letter text here..."></textarea>
-          <button class="analyze-btn" data-type="offer">Decode Offer</button>
+          <textarea id="offer-input" placeholder="Paste your offer letter or agreement text here..."></textarea>
+          <button class="analyze-btn" data-type="offer">Decode Document</button>
         </div>
 
         <!-- Policy Gap Finder Panel -->
         <div class="tool-panel" id="panel-policy">
+          <div class="upload-dropzone" id="dropzone-policy" data-target="policy-input">
+            <div class="dropzone-icon">📁</div>
+            <div class="dropzone-text">
+              <strong>Drag & drop your HR Policy file here</strong> or <span class="browse-link">browse</span>
+            </div>
+            <div class="dropzone-info">Supports PDF, DOCX, TXT (Max 5MB)</div>
+            <input type="file" id="file-policy" class="file-input" accept=".pdf,.docx,.txt" style="display:none;" />
+          </div>
+          <div class="input-divider"><span>OR</span></div>
           <button class="sample-btn" data-target="policy-input" data-sample="policy">Load a sample policy</button>
           <textarea id="policy-input" placeholder="Paste your HR policy document here..."></textarea>
           <button class="analyze-btn" data-type="policy">Find Gaps</button>
@@ -102,6 +134,15 @@
 
         <!-- Resume ATS Checker Panel -->
         <div class="tool-panel" id="panel-resume">
+          <div class="upload-dropzone" id="dropzone-resume" data-target="resume-input">
+            <div class="dropzone-icon">📁</div>
+            <div class="dropzone-text">
+              <strong>Drag & drop your Resume here</strong> or <span class="browse-link">browse</span>
+            </div>
+            <div class="dropzone-info">Supports PDF, DOCX, TXT (Max 5MB)</div>
+            <input type="file" id="file-resume" class="file-input" accept=".pdf,.docx,.txt" style="display:none;" />
+          </div>
+          <div class="input-divider"><span>OR</span></div>
           <button class="sample-btn" data-target="resume-input" data-sample="resume">Load a sample resume</button>
           <textarea id="resume-input" placeholder="Paste your resume text here (copy from your Word doc or PDF)..."></textarea>
           <input class="auth-input" type="text" id="resume-jd" placeholder="Optional: paste the job description to check keyword match" style="margin-top:0;" />

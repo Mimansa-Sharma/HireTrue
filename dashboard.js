@@ -1,3 +1,6 @@
+// Configure pdf.js worker URL
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
 // ─── Sample Documents ────────────────────────────────────────────────────────
 
 const SAMPLES = {
@@ -75,35 +78,35 @@ Quote the worst line, then provide a better version.
 INDIA MARKET INSIGHT:
 One specific insight about Indian talent market performance.`,
 
-  offer: `You are LensHR, an expert in Indian employment law. Decode offer letters for candidates.
+  offer: `You are LensHR, an expert in Indian employment law. Decode offer letters, employment agreements, or NDAs for candidates.
 
 Respond in clean plain text, no markdown symbols. Use CAPS for section headings.
 
 OVERALL VERDICT: [GOOD / REVIEW / CAUTION]
 
 PLAIN ENGLISH SUMMARY:
-2 to 3 sentences explaining the offer in simple terms.
+2 to 3 sentences explaining the offer or agreement in simple terms.
 
 RED FLAG CLAUSES:
-List each concerning clause with risk explanation and relevant Indian law.
+List each concerning clause with risk explanation and relevant Indian law (e.g., Section 27 of the Indian Contract Act for non-competes, IP ownership, probation imbalances, etc.).
 
 CLARIFY BEFORE SIGNING:
 List 3 to 4 specific questions to ask the employer.
 
 NEGOTIATION OPPORTUNITIES:
-List 2 to 3 negotiable items in Indian employment context.
+List 2 to 3 negotiable items in the Indian employment context.
 
 INDIA INDUSTRY BENCHMARK:
-Compare key terms against current Indian industry standards.`,
+Compare key terms against current Indian industry standards for similar roles.`,
 
-  policy: `You are LensHR, an expert in Indian labour law. Analyze HR policies against India's four consolidated Labour Codes (November 2025) and other applicable statutes.
+  policy: `You are LensHR, an expert in Indian labour law. Analyze HR policies against India's consolidated Labour Codes and other applicable statutes.
 
 Respond in clean plain text, no markdown symbols. Use CAPS for section headings.
 
 COMPLIANCE SCORE: X/100
 
 CRITICAL LEGAL GAPS:
-List each serious compliance failure with the specific law violated.
+List each serious compliance failure with the specific law violated (e.g. POSH Act 2013, consolidate Labour Codes).
 
 MISSING CLAUSES REQUIRED BY INDIAN LAW:
 List each legally mandated clause that is absent.
@@ -147,19 +150,19 @@ The single most important change to make immediately.`
 const TOOL_META = {
   jd: {
     title: 'JD Auditor',
-    subtitle: 'Paste a job description to audit it for bias, exclusionary language, and candidate appeal.'
+    subtitle: 'Upload or paste a job description to audit it for bias, exclusionary language, and candidate appeal.'
   },
   offer: {
-    title: 'Offer Decoder',
-    subtitle: 'Paste your offer letter to surface risky clauses, negotiation opportunities, and industry benchmarks.'
+    title: 'Offer & Agreement Decoder',
+    subtitle: 'Upload or paste an offer letter or employment agreement to surface risky clauses, negotiation opportunities, and industry benchmarks.'
   },
   policy: {
     title: 'Policy Gap Finder',
-    subtitle: 'Paste your HR policy to check it against India\'s consolidated Labour Codes and compliance benchmarks.'
+    subtitle: 'Upload or paste your HR policy to check it against India\'s consolidated Labour Codes and compliance benchmarks.'
   },
   resume: {
     title: 'Resume ATS Checker',
-    subtitle: 'Paste your resume text to check ATS compatibility and get recommendations for Indian job platforms.'
+    subtitle: 'Upload or paste your resume text to check ATS compatibility and get recommendations for Indian job platforms.'
   }
 };
 
@@ -189,6 +192,145 @@ document.querySelectorAll('.sample-btn').forEach(btn => {
   });
 });
 
+// ─── Drag-and-Drop File Import Logic ─────────────────────────────────────────
+
+document.querySelectorAll('.upload-dropzone').forEach(dz => {
+  const fileInput = dz.querySelector('.file-input');
+  
+  // Click dropzone triggers the file input dialog
+  dz.addEventListener('click', (e) => {
+    if (e.target.tagName !== 'INPUT') {
+      fileInput.click();
+    }
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      handleFile(e.target.files[0], dz.dataset.target, dz.id);
+    }
+  });
+
+  dz.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dz.classList.add('dragover');
+  });
+
+  dz.addEventListener('dragleave', () => {
+    dz.classList.remove('dragover');
+  });
+
+  dz.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFile(e.dataTransfer.files[0], dz.dataset.target, dz.id);
+    }
+  });
+});
+
+function handleFile(file, targetId, dropzoneId) {
+  // Validate file size (Max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showDropzoneError(dropzoneId, "File exceeds the 5MB size limit.");
+    return;
+  }
+
+  const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+  const dz = document.getElementById(dropzoneId);
+  dz.className = 'upload-dropzone';
+  dz.querySelector('.dropzone-text').innerHTML = '<strong>Extracting text...</strong>';
+  dz.querySelector('.dropzone-icon').textContent = '⏳';
+
+  if (ext === '.txt') {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      fillTextArea(targetId, e.target.result, dropzoneId);
+    };
+    reader.onerror = () => showDropzoneError(dropzoneId, "Failed to read text file.");
+    reader.readAsText(file);
+  } else if (ext === '.docx') {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const arrayBuffer = e.target.result;
+      mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+        .then(result => {
+          if (result.value.trim().length === 0) {
+            showDropzoneError(dropzoneId, "Word document contains no readable text.");
+          } else {
+            fillTextArea(targetId, result.value, dropzoneId);
+          }
+        })
+        .catch(() => showDropzoneError(dropzoneId, "Failed to parse DOCX file."));
+    };
+    reader.readAsArrayBuffer(file);
+  } else if (ext === '.pdf') {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const typedarray = new Uint8Array(e.target.result);
+      pdfjsLib.getDocument({ data: typedarray }).promise
+        .then(pdf => {
+          let maxPages = pdf.numPages;
+          let countPromises = [];
+          for (let j = 1; j <= maxPages; j++) {
+            countPromises.push(
+              pdf.getPage(j).then(page => {
+                return page.getTextContent().then(textContent => {
+                  return textContent.items.map(s => s.str).join(' ');
+                });
+              })
+            );
+          }
+          Promise.all(countPromises)
+            .then(pagesText => {
+              const fullText = pagesText.join('\n\n');
+              if (fullText.trim().length === 0) {
+                showDropzoneError(dropzoneId, "No text extractable from PDF.");
+              } else {
+                fillTextArea(targetId, fullText, dropzoneId);
+              }
+            })
+            .catch(() => showDropzoneError(dropzoneId, "Failed to parse PDF text pages."));
+        })
+        .catch(() => showDropzoneError(dropzoneId, "Invalid or corrupted PDF file."));
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    showDropzoneError(dropzoneId, "Unsupported file format. Use PDF, DOCX, or TXT.");
+  }
+}
+
+function fillTextArea(targetId, text, dropzoneId) {
+  document.getElementById(targetId).value = text;
+  const dz = document.getElementById(dropzoneId);
+  dz.className = 'upload-dropzone success';
+  dz.querySelector('.dropzone-text').innerHTML = '<strong>File loaded successfully!</strong>';
+  dz.querySelector('.dropzone-icon').textContent = '✅';
+  setTimeout(() => { resetDropzone(dropzoneId); }, 2500);
+}
+
+function showDropzoneError(dropzoneId, msg) {
+  const dz = document.getElementById(dropzoneId);
+  dz.className = 'upload-dropzone error';
+  dz.querySelector('.dropzone-text').innerHTML = `<strong>Error:</strong> ${msg}`;
+  dz.querySelector('.dropzone-icon').textContent = '❌';
+  setTimeout(() => { resetDropzone(dropzoneId); }, 3500);
+}
+
+function resetDropzone(dropzoneId) {
+  const dz = document.getElementById(dropzoneId);
+  if (!dz) return;
+  dz.className = 'upload-dropzone';
+  dz.querySelector('.dropzone-icon').textContent = '📁';
+  const type = dropzoneId.split('-')[1];
+  const labels = {
+    jd: 'Job Description',
+    offer: 'Offer Letter or Agreement',
+    policy: 'HR Policy file',
+    resume: 'Resume'
+  };
+  dz.querySelector('.dropzone-text').innerHTML = `<strong>Drag & drop your ${labels[type]} here</strong> or <span class="browse-link">browse</span>`;
+}
+
 // ─── Analysis ────────────────────────────────────────────────────────────────
 
 document.querySelectorAll('.analyze-btn').forEach(btn => {
@@ -197,8 +339,8 @@ document.querySelectorAll('.analyze-btn').forEach(btn => {
     const inputEl = document.getElementById(type + '-input');
     const text = inputEl.value.trim();
 
-    if (!text) { showError('Please paste a document before analyzing.'); return; }
-    if (text.length < 50) { showError('The document seems too short. Please paste the full text.'); return; }
+    if (!text) { showError('Please paste or upload a document before analyzing.'); return; }
+    if (text.length < 50) { showError('The document seems too short. Please provide the full text.'); return; }
 
     // For resume, optionally append JD for keyword matching
     let fullText = text;

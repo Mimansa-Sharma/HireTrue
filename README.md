@@ -1,102 +1,60 @@
-# HireTrue — HR Document Intelligence for India
+# LensHR — HR Document Intelligence for India
 
-AI-powered analysis for job descriptions, offer letters, and HR policies — built specifically for India's workplace laws and hiring culture.
+AI-powered analysis for job descriptions, offer letters, agreements, HR policies, and resumes — built specifically for India's workplace laws and hiring culture.
 
-**Live at:** `hiretrue.vercel.app` *(after you deploy)*
+## Key Features
 
----
-
-## What it does
-
-| Module | What it analyzes |
-|---|---|
-| JD Auditor | Bias, gender language, candidate appeal, IIT elitism, realism |
-| Offer Decoder | Red-flag clauses, non-competes, IP risks, negotiation angles |
-| Policy Gap Finder | POSH Act, Labour Codes, Maternity Benefit Act compliance |
-
----
-
-## Deploy in 4 Steps (Free, No Coding Experience Needed)
-
-### Step 1 — Get your free Anthropic API key
-
-1. Go to [console.anthropic.com](https://console.anthropic.com)
-2. Sign up for a free account
-3. Click **API Keys** in the left sidebar
-4. Click **Create Key** — copy and save it somewhere safe
-
----
-
-### Step 2 — Add your API key to the project
-
-Open the file called `config.js` and replace `YOUR_API_KEY_HERE` with your actual key:
-
-```js
-window.HIRETRUE_API_KEY = 'sk-ant-api03-xxxxxxxxxxxxxxxx';
-```
-
-Save the file.
-
----
-
-### Step 3 — Upload to GitHub
-
-1. Go to [github.com](https://github.com) and create a free account
-2. Click the **+** icon → **New repository**
-3. Name it `hiretrue`, set it to **Public**, click **Create repository**
-4. On the next page, click **uploading an existing file**
-5. Drag and drop all 4 files: `index.html`, `style.css`, `app.js`, `config.js`
-6. Click **Commit changes**
-
----
-
-### Step 4 — Deploy on Vercel (free)
-
-1. Go to [vercel.com](https://vercel.com) and sign up with your GitHub account
-2. Click **Add New Project**
-3. Select your `hiretrue` repository
-4. Click **Deploy** — that's it!
-5. Vercel gives you a free URL like `hiretrue.vercel.app`
-
-**Your site is live. Share the link.**
-
----
+- **Premium Navy & White Design:** Crisp, clean, trust-evoking light theme layout designed for modern HR workflows.
+- **Client-Side Drag-and-Drop Dropbox:** Directly drag & drop your PDF, DOCX, or TXT files (Max 5MB) into any panel. Text is securely extracted 100% on the client side via `pdf.js` and `mammoth.js` (files never leave your browser).
+- **JD Auditor:** Analyzes job descriptions for bias, gender-coded language, candidate appeal, and unrealistic expectations (like IIT/NIT elitism).
+- **Offer & Agreement Decoder:** Flags concerning clauses, non-compete enforceability (under Section 27 of the Indian Contract Act), intellectual property rights, and negotiation angles for NDAs and employment contracts.
+- **Policy Gap Finder:** Checks compliance with the POSH Act 2013, consolidated Labour Codes, Maternity Benefit Act, and other Indian statutes.
+- **Resume ATS Checker:** Reviews ATS compatibility and suggests improvements specifically for Indian job portals like Naukri and LinkedIn India.
 
 ## Project Structure
 
 ```
-hiretrue/
-├── index.html    ← The full website (layout + content)
-├── style.css     ← All visual design and styling
-├── app.js        ← Tool logic, API calls, interactivity
-└── config.js     ← Your API key goes here
+LensHR/
+├── api/
+│   └── analyze.js       ← Vercel serverless function (Anthropic Claude API integration)
+├── index.html           ← Landing page & marketing site
+├── style.css            ← Main stylesheet (Navy and White theme)
+├── auth.js              ← REST-based Supabase authentication (no external SDK dependency)
+├── config.js            ← Environment-safe configuration
+├── dashboard.html       ← User workspace for document analysis (with File Dropzones)
+├── dashboard.css        ← Styles specific to the dashboard interface
+├── dashboard.js         ← Core frontend logic, drag-and-drop parsing, and API caller
+├── pricing.html         ← Dynamic tiered pricing details
+└── README.md            ← Project documentation
 ```
 
----
+## Setup & Deployment on Vercel
 
-## Tech Stack
+### 1. Configure Supabase Auth
+Ensure you have a Supabase project set up. The REST authentication in `auth.js` points to your project instance:
+- `SB_URL` is set to your Supabase project URL.
+- `SB_KEY` is your Supabase Anon public key.
 
-- **Frontend:** Vanilla HTML, CSS, JavaScript (no frameworks)
-- **AI Engine:** Claude claude-sonnet-4-20250514 via Anthropic API
-- **Hosting:** Vercel (free tier)
-- **Fonts:** DM Sans + Instrument Serif (Google Fonts)
+### 2. Vercel Environment Variables
+Add your Anthropic API Key as an environment variable in Vercel to secure it from exposure:
+- Name: `ANTHROPIC_API_KEY`
+- Value: `sk-ant-api03-...`
 
----
+### 3. Deploy
+Install the Vercel CLI or deploy via GitHub integration:
+```bash
+vercel deploy
+```
+Vercel will automatically route traffic to the serverless function `/api/analyze` based on the file placement in the `api/` directory.
 
-## Built by
+## Technology Stack
 
-Final year BBA-MBA (HR) student as a portfolio project addressing real gaps in India's HR document practices.
-
-**India-specific coverage:**
-- Sexual Harassment of Women at Workplace (POSH) Act, 2013
-- Indian Labour Codes (2019–2020)
-- Maternity Benefit (Amendment) Act, 2017
-- Indian Contract Act, 1872 (Section 27 — non-compete enforceability)
-- Occupational Safety, Health and Working Conditions Code, 2020
-- Digital Personal Data Protection Act, 2023
-
----
+- **Frontend:** Vanilla HTML, CSS, JavaScript (no framework overhead)
+- **External Libraries:** `pdf.js` (for PDF text extraction) and `mammoth.js` (for Word document text extraction) via secure CDNs
+- **Database / Auth:** Supabase Auth (via direct REST API endpoint)
+- **AI Core:** Anthropic Claude (via `claude-sonnet-4-20250514` serverless integration)
+- **Hosting:** Vercel
 
 ## Disclaimer
 
-HireTrue provides AI-powered analysis for informational and educational purposes. It does not constitute legal advice. For compliance decisions, consult a qualified Indian labour law practitioner.
+LensHR provides AI-powered analysis for informational and educational purposes only. It does not constitute legal advice. For formal compliance and legal decisions, consult a qualified Indian labour law practitioner.
